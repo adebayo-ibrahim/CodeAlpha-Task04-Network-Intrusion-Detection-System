@@ -27,6 +27,7 @@ network traffic -> Suricata + local.rules -> eve.json -> suricata_watch.py -> al
 | `run_suricata.bat` | Starts Suricata with these rules |
 | `suricata_watch.py` | Reads Suricata's alerts, prints and saves them, blocks attackers |
 | `report.py` | Builds `dashboard.html` from the saved alerts |
+
 ![](suricata_code.png) ![](suricata_watch.png)
 
 `alerts.jsonl` and `dashboard.html` are created when the scripts run.
@@ -45,6 +46,7 @@ network traffic -> Suricata + local.rules -> eve.json -> suricata_watch.py -> al
 | 1000008 | Attempt to read `/etc/passwd` | High |
 | 1000009 | Scanner tool user-agent: sqlmap, nikto, masscan, nmap | Medium |
 | 1000100 | Test rule: the URL `/ids-test` was requested | Medium |
+
 ![](suricata_rules.png)
 
 A rule reads like this:
