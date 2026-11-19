@@ -1,0 +1,25 @@
+# local.rules - custom Suricata rules for CodeAlpha Task 4 (Network Intrusion Detection)
+#
+# How a rule reads:
+#   alert http any any -> any any ( options )
+#   action  protocol  source IP/port -> destination IP/port ( options )
+# Options: msg = text shown in the alert, sid = unique rule number (1000000+ is for local rules),
+#          priority = severity (1 high, 2 medium, 3 low), content / pcre = what to look for.
+# Some rules use "any" as the direction so you can test them from this computer.
+# Use "-> $HOME_NET" instead if you only want to watch traffic coming INTO your network.
+
+# ---------- Test rule: proves that Suricata and the watcher work ----------
+alert http any any -> any any (msg:"LOCAL IDS test - /ids-test was requested"; flow:established,to_server; http.uri; content:"/ids-test"; priority:2; sid:1000100; rev:1;)
+
+# ---------- Network rules ----------
+alert icmp any any -> any any (msg:"LOCAL ICMP echo request (ping)"; itype:8; priority:3; sid:1000001; rev:1;)
+alert icmp any any -> any any (msg:"LOCAL ICMP flood - 10 or more pings in 10 seconds"; itype:8; threshold:type both, track by_src, count 10, seconds 10; priority:1; sid:1000002; rev:1;)
+alert tcp any any -> $HOME_NET any (msg:"LOCAL Possible port scan - 20 or more SYN packets in 10 seconds"; flags:S; threshold:type both, track by_src, count 20, seconds 10; priority:1; sid:1000003; rev:1;)
+
+# ---------- Web attack rules (only work on unencrypted HTTP) ----------
+alert http any any -> any any (msg:"LOCAL SQL injection attempt - UNION SELECT"; flow:established,to_server; http.uri; content:"union"; nocase; content:"select"; nocase; distance:0; priority:1; sid:1000004; rev:1;)
+alert http any any -> any any (msg:"LOCAL SQL injection attempt - 1=1 trick"; flow:established,to_server; http.uri; content:"1=1"; priority:1; sid:1000005; rev:1;)
+alert http any any -> any any (msg:"LOCAL Cross-site scripting attempt - script tag"; flow:established,to_server; http.uri; content:"<script"; nocase; priority:2; sid:1000006; rev:1;)
+alert http any any -> any any (msg:"LOCAL Path traversal attempt - ../"; flow:established,to_server; http.uri.raw; content:"../"; priority:1; sid:1000007; rev:1;)
+alert http any any -> any any (msg:"LOCAL Attempt to read /etc/passwd"; flow:established,to_server; http.uri; content:"/etc/passwd"; nocase; priority:1; sid:1000008; rev:1;)
+alert http any any -> any any (msg:"LOCAL Scanner tool user-agent - sqlmap, nikto, masscan or nmap"; flow:established,to_server; http.user_agent; pcre:"/sqlmap|nikto|masscan|nmap scripting engine/i"; priority:2; sid:1000009; rev:1;)
